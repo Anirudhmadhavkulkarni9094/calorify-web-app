@@ -56,6 +56,7 @@ export async function POST(req: NextRequest) {
     const userId = decoded.id
 
     const body = await req.json()
+    console.log("body" , body)
 
     const { name, age, height_cm, weight_kg, goal, gender, activity_level, diet_type } = body
 

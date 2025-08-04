@@ -21,7 +21,9 @@ export default function UserProfileForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -35,12 +37,17 @@ export default function UserProfileForm() {
 
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.post('/api/user/profile', formData, {
+      const res = await axios.post('/api/user/profile', {
+        ...formData,
+        age: parseInt(formData.age),
+        height_cm: parseFloat(formData.height_cm),
+        weight_kg: parseFloat(formData.weight_kg),
+      }, {
         headers: { Authorization: `Bearer ${token}` },
       })
 
       if (res.status === 201) {
-        router.push('/dashboard') // Change redirect as needed
+        router.push('/dashboard')
       }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to submit')
@@ -112,15 +119,18 @@ export default function UserProfileForm() {
           <option value="other">Other</option>
         </select>
 
-        <input
-          type="text"
+        <select
           name="goal"
-          placeholder="Goal (e.g. fat_loss, muscle_gain, maintenance)"
           value={formData.goal}
           onChange={handleChange}
           required
           className="w-full border p-2 rounded"
-        />
+        >
+          <option value="">Select Goal</option>
+          <option value="fat_loss">Fat Loss</option>
+          <option value="muscle_gain">Muscle Gain</option>
+          <option value="maintenance">Maintenance</option>
+        </select>
 
         <select
           name="activity_level"
