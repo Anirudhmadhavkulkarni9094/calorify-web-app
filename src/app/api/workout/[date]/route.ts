@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import jwt from 'jsonwebtoken'
 
 export async function GET(req: NextRequest,
   {params}: { params: Promise<{ date: string }> }) {
   try {
+     const token = req.headers.get('authorization')?.split(' ')[1]
+        if (!token)
+          return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    
+        const decoded: any = jwt.verify(token, process.env.JWT_SECRET!)
+        const userId = decoded.id
     const date = (await params).date;
 
     console.log("dateParam" , date)
@@ -32,7 +39,7 @@ export async function GET(req: NextRequest,
     const { data, error } = await supabase
       .from('workouts')
       .select('*')
-      // .eq('user_id', userId) // Uncomment if filtering by user
+      .eq('user_id', userId) // Uncomment if filtering by user
       .gte('created_at', start)
       .lte('created_at', end)
       .order('created_at', { ascending: true });

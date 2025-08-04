@@ -4,13 +4,12 @@ import { supabase } from '@/lib/supabase'
 
 export async function GET(req: NextRequest) {
   try {
-    // JWT block (optional)
-    // const token = req.headers.get('authorization')?.split(' ')[1]
-    // if (!token)
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const token = req.headers.get('authorization')?.split(' ')[1]
+    if (!token)
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    // const decoded: any = jwt.verify(token, process.env.JWT_SECRET!)
-    // const userId = decoded.id
+    const decoded: any = jwt.verify(token, process.env.JWT_SECRET!)
+    const userId = decoded.id
 
     const today = new Date()
     const day = today.getUTCDay()
@@ -29,7 +28,7 @@ export async function GET(req: NextRequest) {
     const { data, error } = await supabase
       .from('workouts')
       .select('*')
-      // .eq('user_id', userId)
+      .eq('user_id', userId)
       .gte('created_at', start)
       .lte('created_at', end)
 
