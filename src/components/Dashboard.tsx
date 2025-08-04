@@ -1,0 +1,118 @@
+import { useUserProfile } from '@/hooks/useUserProfile'
+import { User, Pencil, Save } from 'lucide-react'
+import { useEffect, useState } from 'react'
+
+export default function Dashboard() {
+  const { profile, loading, error } = useUserProfile()
+  const [editMode, setEditMode] = useState(false)
+  const [formData, setFormData] = useState<any>({})
+  const [profileData , setProfileData] = useState();
+  const handleChange = (key: string, value: string) => {
+    setFormData({ ...formData, [key]: value })
+  }
+
+  useEffect(()=>{
+    setProfileData(profile);
+  })
+  const handleSave = async () => {
+    try {
+      const res = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`, // Adjust if token is elsewhere
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (!res.ok) {
+        throw new Error('Failed to update profile')
+      }
+
+      const { profile: updatedProfile } = await res.json()
+      console.log(updatedProfile)
+      
+      setEditMode(false)
+    } catch (err) {
+      alert('Error saving profile')
+      console.error(err)
+    }
+  }
+
+  if (loading) return <p className="text-center text-gray-500 mt-6">Loading profile...</p>
+  if (error) return <p className="text-center text-red-500 mt-6">Error: {error}</p>
+
+  return (
+    <div className="max-w-xl mx-auto mt-10 shadow-lg rounded-2xl overflow-hidden border border-gray-200">
+      <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 text-white text-center">
+        <div className="flex justify-center mb-2">
+          <User size={32} />
+        </div>
+        <h2 className="text-2xl font-bold">
+          Welcome, {profile?.name.toUpperCase()}!
+        </h2>
+        <p className="text-sm opacity-90">Here’s your health summary</p>
+        <div className="mt-4">
+          {editMode ? (
+            <button
+              onClick={handleSave}
+              className="bg-white text-indigo-600 px-4 py-1 rounded-full text-sm flex items-center gap-2 mx-auto"
+            >
+              <Save size={16} />
+              Save
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                setEditMode(true)
+                setFormData(profile)
+              }}
+              className="bg-white text-indigo-600 px-4 py-1 rounded-full text-sm flex items-center gap-2 mx-auto"
+            >
+              <Pencil size={16} />
+              Edit Profile
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="p-6 bg-white">
+        <ul className="grid grid-cols-2 gap-4">
+          {profile &&
+            Object.entries(profile).map(([key, value]) =>
+              key !== 'name' ? (
+                <li
+                  key={key}
+                  className="bg-gray-50 p-3 rounded-lg shadow-sm border text-center"
+                >
+                  <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+                    {formatKey(key)}
+                  </div>
+                  {editMode ? (
+                    <input
+                      type="text"
+                      value={formData[key] ?? ''}
+                      onChange={(e) => handleChange(key, e.target.value)}
+                      className="text-sm mt-1 w-full text-center bg-white border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    />
+                  ) : (
+                    <div className="text-lg font-semibold text-gray-800">
+                      {String(value)}
+                    </div>
+                  )}
+                </li>
+              ) : null
+            )}
+        </ul>
+      </div>
+    </div>
+  )
+}
+
+// Helper to format keys nicely
+function formatKey(key: string) {
+  return key
+    .replace(/_/g, ' ')
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+}
