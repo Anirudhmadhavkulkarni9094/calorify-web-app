@@ -69,11 +69,6 @@ function Navbar() {
                     Login
                   </Button>
                 </Link>
-                <Link href='/register'>
-                  <Button className='w-full' variant='outline' onClick={handleClose}>
-                    Register
-                  </Button>
-                </Link>
               </>
             )}
           </div>
