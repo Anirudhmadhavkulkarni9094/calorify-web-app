@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
 export async function GET(req: NextRequest,
-  { params }: { params: { date: string } } ) {
+  {params}: { params: Promise<{ date: string }> }) {
   try {
-    const date = params.date;
+    const date = (await params).date;
 
     console.log("dateParam" , date)
     const selectedDate = new Date(date);

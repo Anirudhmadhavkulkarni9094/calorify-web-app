@@ -6,9 +6,11 @@ import { supabase } from '@/lib/supabase'
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { date: string } }
+  {params}: { params: Promise<{ date: string }>  }
 ) {
   try {
+      const date = (await params).date
+
     const token = req.headers.get('authorization')?.split(' ')[1]
     if (!token)
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -16,7 +18,7 @@ export async function GET(
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET!)
     const userId = decoded.id
 
-    const rawDate = new Date(params.date) // full ISO format
+    const rawDate = new Date(date) // full ISO format
 
     // Start of day (00:00:00 UTC)
     const start = new Date(
@@ -33,7 +35,7 @@ export async function GET(
     const { data, error } = await supabase
       .from('diets')
       .select('*')
-      .eq('user_id', userId)
+      // .eq('user_id', userId)
       .gte('created_at', start)
       .lte('created_at', end)
       .order('created_at', { ascending: false })
