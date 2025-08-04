@@ -3,8 +3,14 @@ import jwt from 'jsonwebtoken'
 import { supabase } from '@/lib/supabase'
 
 export async function GET(req: NextRequest) {
-  try {
-    const token = req.headers.get('authorization')?.split(' ')[1]
+  const authHeader = req.headers.get('authorization');
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
+  const token = authHeader.split(' ')[1];
+  try{
     if (!token)
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -22,8 +28,6 @@ export async function GET(req: NextRequest) {
     const end = new Date(
       Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + diffToMonday + 6, 23, 59, 59, 999)
     ).toISOString()
-
-    console.log('Fetching workouts between:', start, 'and', end)
 
     const { data, error } = await supabase
       .from('workouts')
@@ -43,10 +47,8 @@ export async function GET(req: NextRequest) {
       }, { status: 200 })
     }
 
-    // Total calories
     const totalCaloriesBurned = data.reduce((sum, workout) => sum + (workout.calories || 0), 0)
 
-    // Muscle collection and intensity count
     const musclesSet = new Set<string>()
     const muscleIntensity: Record<string, number> = {}
 

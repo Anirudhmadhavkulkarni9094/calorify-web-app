@@ -1,9 +1,21 @@
-import { NextResponse } from 'next/server'
+import { NextResponse , NextRequest } from 'next/server'
 import { supabase } from '@/lib/supabase'
-// import jwt from 'jsonwebtoken' // Uncomment if using JWT
+import jwt from 'jsonwebtoken' // Uncomment if using JWT
 
-export async function GET() {
-  try {
+export async function GET(req: NextRequest) {
+  const authHeader = req.headers.get('authorization');
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
+  const token = authHeader.split(' ')[1];
+  try{
+    if (!token)
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const decoded: any = jwt.verify(token, process.env.JWT_SECRET!)
+    const userId = decoded.id
     const today = new Date()
     const day = today.getUTCDay() // 0 (Sun) to 6 (Sat)
     const diffToSunday = -day // Go back to Sunday
@@ -25,12 +37,12 @@ export async function GET() {
       )
     ).toISOString()
 
-    console.log('Fetching diet logs between:', start, 'and', end)
+    console.log('Fetching diet logs between:', start, 'and', end , "for user :" , userId)
 
     const { data, error } = await supabase
       .from('diets')
       .select('*')
-      // .eq('user_id', userId)
+      .eq('user_id', userId)
       .gte('created_at', start)
       .lte('created_at', end)
 
@@ -40,9 +52,9 @@ export async function GET() {
       return NextResponse.json({
         message: 'No diet logs found for this week',
         totalCaloriesConsumed: 0,
-        totalProtein: 0,
-        totalCarbs: 0,
-        totalFats: 0,
+        protein: 0,
+      carbs: 0,
+      fats:0,
         meals: [],
       }, { status: 200 })
     }

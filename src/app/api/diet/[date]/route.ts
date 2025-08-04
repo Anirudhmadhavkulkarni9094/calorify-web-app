@@ -35,7 +35,7 @@ export async function GET(
     const { data, error } = await supabase
       .from('diets')
       .select('*')
-      // .eq('user_id', userId)
+      .eq('user_id', userId)
       .gte('created_at', start)
       .lte('created_at', end)
       .order('created_at', { ascending: false })

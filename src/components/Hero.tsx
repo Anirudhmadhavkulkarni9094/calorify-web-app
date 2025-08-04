@@ -43,6 +43,7 @@ export default function DietSummary({ setWorkoutMuscle }: { setWorkoutMuscle: an
         ]);
 
         setTotals(dietRes.data);
+        console.log(dietRes.data)
         setWorkout(workoutRes.data);
         setWorkoutMuscle(workoutRes.data.musclesTrained);
       } catch (err: any) {
