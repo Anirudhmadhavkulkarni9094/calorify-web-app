@@ -13,7 +13,7 @@ import {
 import "react-day-picker/dist/style.css";
 
 export default function WorkoutPage() {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+  const [selectedDate, setSelectedDate] = useState<any>(
     new Date()
   );
   const [workoutText, setWorkoutText] = useState("");
@@ -27,9 +27,11 @@ export default function WorkoutPage() {
 
   const isToday = selectedDate ? isSameDay(selectedDate, new Date()) : false;
 
-  const updateDate = (e: any) => {
-    setSelectedDate(e);
-  };
+ const updateDate = (day: Date )=> {
+  const d = new Date(day)
+  d.setDate(d.getDate() + 1) // add 1 day
+  setSelectedDate(d.toISOString().slice(0, 10))
+}  
 
   useEffect(() => {
     if (selectedDate) fetchWorkout();
@@ -42,7 +44,7 @@ export default function WorkoutPage() {
       setLoading(false);
       return;
     }
-    const res = await fetch(`/api/workout/${selectedDate.toISOString()}`, {
+    const res = await fetch(`/api/workout/${selectedDate}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -101,6 +103,7 @@ export default function WorkoutPage() {
             mode="single"
             selected={selectedDate}
             onSelect={updateDate}
+            required
           />
         </div>
 

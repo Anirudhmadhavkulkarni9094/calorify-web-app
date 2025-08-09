@@ -122,6 +122,7 @@ Respond strictly in **valid JSON** (no extra text, no comments, no markdown, no 
         calories: calorie_burned,
         muscle_trained: parsed.muscle_trained,
         created_at: new Date().toISOString(),
+        date: new Date().toISOString(),
       },
     ]);
 
