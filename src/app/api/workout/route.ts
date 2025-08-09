@@ -69,18 +69,20 @@ export async function POST(req: NextRequest) {
     if (profileError || !userProfile) throw new Error("User profile not found");
 
     // 2. Prepare Gemini AI prompt
- const prompt = `
+const prompt = `
 You are a fitness assistant helping users track and improve their workouts. Always respond accurately, clearly, and in structured JSON format.
 
+strictly only Allowed muscle groups: calves,knee,Hamstrings,abs,Biceps,triceps,chest,shoulders,lowerback,lateralhead,longhead,lats,trapezius,trap.
+
 User Profile:
-- Age: ${userProfile.age}
-- Height: ${userProfile.height_cm} cm
-- Weight: ${userProfile.weight_kg} kg
-- Activity Level: ${userProfile.activity_level} (e.g., Sedentary, Lightly active, Active, Very active)
-- Goal: ${userProfile.goal} (e.g., Fat loss, Muscle gain, Endurance)
+- Age: \${userProfile.age}
+- Height: \${userProfile.height_cm} cm
+- Weight: \${userProfile.weight_kg} kg
+- Activity Level: \${userProfile.activity_level} (e.g., Sedentary, Lightly active, Active, Very active)
+- Goal: \${userProfile.goal} (e.g., Fat loss, Muscle gain, Endurance)
 
 Workout Details:
-"${workout_description}"
+"\${workout_description}"
 
 Instructions:
 1. Estimate the total calories burned using scientifically sound methods (e.g., MET values or heart rate-based estimates) based on the user's profile and workout description. If workout duration is missing, assume a standard of 30 minutes unless otherwise stated.
@@ -92,7 +94,7 @@ Instructions:
    - How effective the workout is for the user's stated fitness goal
    - Suggestions for improvement, balance, or safety tips
 
-3. Extract and list the major muscle groups trained in an array of lowercase strings (e.g., ["chest", "shoulders", "quads"]).
+3. Extract and list the major muscle groups trained in an array of lowercase strings. You must strictly choose from the allowed muscle groups list above. No extra or alternative names.
 
 Output Format:
 Respond strictly in **valid JSON** (no extra text, no comments, no markdown, no code blocks). Ensure proper escaping and formatting.
@@ -100,9 +102,10 @@ Respond strictly in **valid JSON** (no extra text, no comments, no markdown, no 
 {
   "calorie_burned": number,
   "workout_suggestion": string, // HTML with inline font-size styles
-  "muscle_trained": [string]
+  "muscle_trained": [string] // strictly from allowed muscle groups
 }
 `;
+
 
 
     const geminiResponse = await getGeminiResponse(prompt);
