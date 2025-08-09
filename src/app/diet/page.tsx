@@ -36,7 +36,11 @@ export default function DietTracker() {
     if (selectedDate) fetchDiet()
   }, [selectedDate])
 
-  const updateDate = (day: Date | undefined) => setSelectedDate(day)
+const updateDate = (day: Date) => {
+  const d = new Date(day)
+  d.setDate(d.getDate() + 1) // add 1 day
+  setSelectedDate(d.toISOString().slice(0, 10))
+}  
 
   // Optionally fetch existing diet data if you have API for it
   const fetchDiet = async () => {
@@ -48,15 +52,14 @@ export default function DietTracker() {
     }
 
     
-const date = new Date(selectedDate).toISOString() // "2025-08-07"
     try {
-      const res = await fetch(`/api/diet/${date}`, {
+      const res = await fetch(`/api/diet/${selectedDate}`, {
   headers: { Authorization: `Bearer ${token}` },
 })
       if (!res.ok) throw new Error('Failed to fetch diet')
-
       const data = await res.json()
-    console.log(data)
+    console.log("date: ", selectedDate)
+    console.log("dataaa",data)
       setDietText(data?.meal_description || '')
       setMacroData({
         calories: data?.nutrients?.calories || 0,
@@ -160,7 +163,7 @@ const date = new Date(selectedDate).toISOString() // "2025-08-07"
       {/* Left: Calendar */}
       <div className="space-y-6">
         <div className="bg-white rounded-2xl shadow-lg p-4">
-          <DayPicker mode="single" selected={selectedDate} onSelect={updateDate} />
+          <DayPicker mode="single" selected={selectedDate} onSelect={updateDate} required />
         </div>
       </div>
 
@@ -168,7 +171,7 @@ const date = new Date(selectedDate).toISOString() // "2025-08-07"
       <div className="bg-gray-900 text-white rounded-2xl shadow-lg p-6 space-y-4">
         <p className="text-sm text-gray-300 flex items-center gap-2">
           <CalendarDays className="w-4 h-4" />
-          {isToday ? 'Today’s Meal Input' : selectedDate?.toDateString()}
+          {isToday ? 'Today’s Meal Input' : selectedDate}
         </p>
 
         {isToday ? (

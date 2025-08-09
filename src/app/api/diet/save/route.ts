@@ -21,7 +21,8 @@ export async function POST(req: NextRequest) {
         protein: nutrition.protein,
         carbs: nutrition.carbs,
         fats: nutrition.fat,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        date : new Date().toISOString()
       }
     ])
 

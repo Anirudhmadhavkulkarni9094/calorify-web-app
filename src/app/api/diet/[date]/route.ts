@@ -1,49 +1,47 @@
 // app/api/diet/[date]/route.ts
-
 import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
 import { supabase } from '@/lib/supabase'
 
 export async function GET(
   req: NextRequest,
-  {params}: { params: Promise<{ date: string }>  }
+  { params }: { params: Promise<{ date: string }> }
 ) {
   try {
-      const date = (await params).date
+    // Await the params object and parse date
+    const { date: dateParam } = await params
 
-    const token = req.headers.get('authorization')?.split(' ')[1]
-    if (!token)
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    console.log("date" , dateParam )
 
-    const decoded: any = jwt.verify(token, process.env.JWT_SECRET!)
-    const userId = decoded.id
+    // Convert to YYYY-MM-DD for matching DATE column
+    const onlyDate = new Date(dateParam).toISOString().slice(0, 10)
 
-    const rawDate = new Date(date) // full ISO format
+    // Verify JWT
+    // const token = req.headers.get('authorization')?.split(' ')[1]
+    // if (!token) {
+    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // }
 
-    // Start of day (00:00:00 UTC)
-    const start = new Date(
-      Date.UTC(rawDate.getUTCFullYear(), rawDate.getUTCMonth(), rawDate.getUTCDate(), 0, 0, 0, 0)
-    ).toISOString()
+    // const decoded: any = jwt.verify(token, process.env.JWT_SECRET!)
+    // const userId = decoded.id
 
-    // End of day (23:59:59.999 UTC)
-    const end = new Date(
-      Date.UTC(rawDate.getUTCFullYear(), rawDate.getUTCMonth(), rawDate.getUTCDate(), 23, 59, 59, 999)
-    ).toISOString()
-
-    console.log('Fetching diets between:', start, 'and', end)
-
+    // Query for matching user + date
     const { data, error } = await supabase
       .from('diets')
       .select('*')
-      .eq('user_id', userId)
-      .gte('created_at', start)
-      .lte('created_at', end)
+      // .eq('user_id', userId)
+      .eq('date', onlyDate)
       .order('created_at', { ascending: false })
 
     if (error) throw error
 
+    console.log(data)
+
     if (!data || data.length === 0) {
-      return NextResponse.json({ message: 'No diet found for this date', data: null }, { status: 200 })
+      return NextResponse.json(
+        { message: 'No diet found for this date', data: null },
+        { status: 200 }
+      )
     }
 
     // Sum numeric fields
@@ -52,19 +50,13 @@ export async function GET(
     const totalCarbs = data.reduce((sum, entry) => sum + (entry.carbs || 0), 0)
     const totalFat = data.reduce((sum, entry) => sum + (entry.fats || 0), 0)
 
-    // Combine text fields, joining unique values separated by new lines
-    // Remove null/undefined and duplicates
-    const combineUnique = (arr: (string | null | undefined)[]) => 
-      Array.from(new Set(arr.filter(Boolean))).join('\n')
-
- 
-
     return NextResponse.json({
       nutrients: {
         calories: totalCalories,
         protein: totalProtein,
         carbs: totalCarbs,
         fat: totalFat,
+        date: onlyDate,
       },
     })
   } catch (err: any) {

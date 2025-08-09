@@ -22,8 +22,7 @@ export async function GET(req: NextRequest) {
       .from('diets')
       .select('*')
       .eq('user_id', userId) // Uncomment if filtering by user
-      .gte('created_at', '2025-08-02T16:46:46.125Z')  // ✅ Correct ISO format
-      .lte('created_at', '2025-08-03T16:46:46.125Z')  // ✅ More inclusive
+      
       .order('created_at', { ascending: false })
 
     if (error) throw error
