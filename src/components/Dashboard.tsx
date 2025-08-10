@@ -20,6 +20,26 @@ const dietOptions = [
   'pescatarian'
 ]
 
+// Display labels mapping
+const optionLabels: Record<string, string> = {
+  male: "Male",
+  female: "Female",
+  other: "Other",
+  fat_loss: "Fat Loss",
+  muscle_gain: "Muscle Gain",
+  maintenance: "Maintenance",
+  sedentary: "Sedentary",
+  lightly_active: "Lightly Active",
+  moderately_active: "Moderately Active",
+  very_active: "Very Active",
+  extra_active: "Extra Active",
+  vegetarian: "Vegetarian",
+  non_vegetarian: "Non-Vegetarian",
+  eggetarian: "Eggetarian",
+  vegan: "Vegan",
+  pescatarian: "Pescatarian"
+}
+
 const editableFields = [
   'name',
   'age',
@@ -47,7 +67,6 @@ export default function Dashboard() {
   }
 
   const handleSave = async () => {
-    // Basic validation
     const { name, age, height_cm, weight_kg, gender, goal, activity_level, diet_type } = formData
 
     if (!name || !age || !height_cm || !weight_kg || !gender || !goal || !activity_level || !diet_type) {
@@ -93,45 +112,56 @@ export default function Dashboard() {
     }
   }
 
-  if (loading) return <p className="text-center text-gray-500 mt-6">Loading profile...</p>
+  if (loading) return <p className="text-center text-purple-400 mt-6">Loading profile...</p>
   if (error) return <p className="text-center text-red-500 mt-6">Error: {error}</p>
 
   return (
-    <div className="max-w-xl mx-auto mt-10 shadow-lg rounded-2xl overflow-hidden border border-gray-200">
-      <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 text-white text-center">
-        <div className="flex justify-center mb-2">
-          <User size={32} />
-        </div>
-        <h2 className="text-2xl font-bold">
-          Welcome, {formData?.name?.toUpperCase()}!
-        </h2>
-        <p className="text-sm opacity-90">Here’s your health summary</p>
-        <div className="mt-4">
-          {editMode ? (
-            <button
-              onClick={handleSave}
-              className="bg-white text-indigo-600 px-4 py-1 rounded-full text-sm flex items-center gap-2 mx-auto"
-            >
-              <Save size={16} />
-              Save
-            </button>
-          ) : (
-            <button
-              onClick={() => setEditMode(true)}
-              className="bg-white text-indigo-600 px-4 py-1 rounded-full text-sm flex items-center gap-2 mx-auto"
-            >
-              <Pencil size={16} />
-              Edit Profile
-            </button>
-          )}
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-[#1a1a1a] via-[#1f0f2e] to-[#0f0f0f] flex items-center justify-center p-6">
+      <div className="max-w-xl w-full rounded-2xl shadow-2xl border border-purple-400/30 backdrop-blur-lg bg-white/5 p-6">
+        
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-3">
+            <div className="bg-purple-500/20 p-3 rounded-full border border-purple-400/30">
+              <User size={32} className="text-purple-300" />
+            </div>
+          </div>
+          <h2 className="text-3xl font-bold text-purple-200">
+            Welcome, {formData?.name?.toUpperCase()}!
+          </h2>
+          <p className="text-purple-400 mt-1 text-sm">
+            Here’s your health summary
+          </p>
 
-      <div className="p-6 bg-white">
+          <div className="mt-4">
+            {editMode ? (
+              <button
+                onClick={handleSave}
+                className="bg-purple-500 hover:bg-purple-600 px-5 py-2 rounded-full text-sm font-medium text-white flex items-center gap-2 mx-auto transition-all duration-300"
+              >
+                <Save size={16} />
+                Save
+              </button>
+            ) : (
+              <button
+                onClick={() => setEditMode(true)}
+                className="bg-purple-500 hover:bg-purple-600 px-5 py-2 rounded-full text-sm font-medium text-white flex items-center gap-2 mx-auto transition-all duration-300"
+              >
+                <Pencil size={16} />
+                Edit Profile
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Profile fields */}
         <ul className="grid grid-cols-2 gap-4">
           {editableFields.map((key) => (
-            <li key={key} className="bg-gray-50 p-3 rounded-lg shadow-sm border text-center">
-              <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+            <li
+              key={key}
+              className="p-4 rounded-xl bg-white/10 border border-purple-400/20 backdrop-blur-sm hover:scale-[1.02] transition-all duration-200"
+            >
+              <div className="text-xs text-purple-300 font-medium uppercase tracking-wide mb-1">
                 {formatKey(key)}
               </div>
               {editMode ? (
@@ -139,11 +169,15 @@ export default function Dashboard() {
                   <select
                     value={formData[key] ?? ''}
                     onChange={(e) => handleChange(key, e.target.value)}
-                    className="text-sm mt-1 w-full text-center bg-white border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="text-sm w-full text-center bg-transparent border border-purple-400/30 rounded-md px-2 py-1 text-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >
                     {getOptions(key).map((opt) => (
-                      <option key={opt} value={opt}>
-                        {formatKey(opt)}
+                      <option
+                        key={opt}
+                        value={opt}
+                        className="bg-[#1a1a1a] text-purple-100"
+                      >
+                        {optionLabels[opt] || opt}
                       </option>
                     ))}
                   </select>
@@ -152,12 +186,12 @@ export default function Dashboard() {
                     type={['age', 'height_cm', 'weight_kg'].includes(key) ? 'number' : 'text'}
                     value={formData[key] ?? ''}
                     onChange={(e) => handleChange(key, e.target.value)}
-                    className="text-sm mt-1 w-full text-center bg-white border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="text-sm w-full text-center bg-transparent border border-purple-400/30 rounded-md px-2 py-1 text-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 )
               ) : (
-                <div className="text-lg font-semibold text-gray-800">
-                  {String(formData[key])}
+                <div className="text-lg font-semibold text-purple-100">
+                  {optionLabels[formData[key]] || String(formData[key])}
                 </div>
               )}
             </li>

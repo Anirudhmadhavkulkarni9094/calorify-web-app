@@ -24,14 +24,16 @@ function Navbar() {
   const handleClose = () => setOpen(false)
 
   const handleLogout = () => {
-    localStorage.removeItem('token') // or use your auth logic
+    localStorage.removeItem('token')
     handleClose()
-    router.push('/login') // optional redirect
+    router.push('/login')
   }
 
   return (
-    <div className='flex justify-between p-4 text-purple-400'>
-      <h1 className='text-lg font-bold'>Calorify</h1>
+    <nav className="w-full bg-gradient-to-r from-[#1f0f2e] via-[#2a1a4f] to-[#1a1a1a] px-6 py-3 flex items-center justify-between text-purple-300 shadow-lg backdrop-blur-md border-b border-purple-700/50">
+      <h1 className="text-xl font-extrabold tracking-wide text-purple-400 select-none">
+        Calorify
+      </h1>
 
       <Breadcrumb />
 
@@ -39,42 +41,55 @@ function Navbar() {
         <DialogTrigger asChild>
           <button
             onClick={() => setOpen(true)}
-            className='h-10 w-10 flex justify-center items-center rounded-full bg-purple-500 text-white'
+            aria-label="Open user settings"
+            className="h-10 w-10 flex justify-center items-center rounded-full bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white shadow-md transition-colors"
           >
-            <User />
+            <User size={20} />
           </button>
         </DialogTrigger>
 
-        <DialogContent className="max-w-[300px] rounded-xl">
+        <DialogContent className="max-w-[320px] rounded-2xl border border-purple-400/20 bg-white/10 backdrop-blur-lg shadow-lg p-6">
           <DialogHeader>
-            <DialogTitle className='text-purple-600'>Settings</DialogTitle>
+            <DialogTitle className="text-purple-300 text-lg font-semibold mb-4">
+              Settings
+            </DialogTitle>
           </DialogHeader>
 
-          <div className='flex flex-col gap-3'>
+          <div className="flex flex-col gap-4">
             {isAuthenticated ? (
               <>
-                <Link href='/profile'>
-                  <Button className='w-full' onClick={handleClose}>
+                <Link href="/profile">
+                  <Button
+                    className="w-full text-purple-200"
+                    variant="ghost"
+                    onClick={handleClose}
+                  >
                     Profile
                   </Button>
                 </Link>
-                <Button className='w-full' variant='outline' onClick={handleLogout}>
+                <Button
+                  className="w-full text-purple-300 border border-purple-300 hover:bg-purple-700"
+                  variant="outline"
+                  onClick={handleLogout}
+                >
                   Logout
                 </Button>
               </>
             ) : (
-              <>
-                <Link href='/login'>
-                  <Button className='w-full' onClick={handleClose}>
-                    Login
-                  </Button>
-                </Link>
-              </>
+              <Link href="/login">
+                <Button
+                  className="w-full text-purple-200"
+                  variant="ghost"
+                  onClick={handleClose}
+                >
+                  Login
+                </Button>
+              </Link>
             )}
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </nav>
   )
 }
 
